@@ -1,0 +1,49 @@
+<div class="container mx-auto py-8">
+    <h1 class="font-bold text-4xl text-center mb-8">MatchPosts#index</h1>
+    <p class="text-center mb-12">Find me in app/views/match_posts/index.html.erb</p>
+
+    <!-- グリッドレイアウトで投稿を配置 -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <% @match_posts.each do |match_post| %>
+        <div class="bg-white shadow-md rounded-lg overflow-hidden p-4">
+            <!-- Image Section -->
+            <div class="mb-4">
+                <h2 class="font-semibold text-xl mb-2"><%= match_post.image_post.title %></h2>
+                <%= image_tag match_post.image_post.image, size: "500x500", class: "w-full h-auto object-cover rounded" %>
+                <p class="mt-2 text-gray-600">By <%= match_post.image_post.user.username %></p>
+                <p class="text-gray-500"><%= match_post.image_post.user.profile %></p>
+                <%= link_to user_path(match_post.image_post.user), class: "text-blue-500 hover:underline" do %>
+                    <%= match_post.image_post.user.username %> さんのページへ
+                <% end %>
+            </div>
+
+            <!-- Music Section -->
+            <div class="mb-4">
+                <h2 class="font-semibold text-xl mb-2"><%= match_post.music_post.title %></h2>
+                <% if match_post.music_post.present? && match_post.music_post.music.present? %>
+                    <audio src="<%= url_for(match_post.music_post.music) %>" controls class="w-full">
+                        <a href="<%= url_for(match_post.music_post.music) %>" download class="text-blue-500 hover:underline">ダウンロード</a>
+                    </audio>
+                <% end %>
+                <p class="mt-2 text-gray-600">By <%= match_post.music_post.user.username %></p>
+                <p class="text-gray-500"><%= match_post.music_post.user.profile %></p>
+                <%= link_to user_path(match_post.music_post.user), class: "text-blue-500 hover:underline" do %>
+                    <%= match_post.music_post.user.username %> さんのページへ
+                <% end %>
+            </div>
+
+            <!-- Like Section -->
+            <div class="mt-4 flex">
+                <% if match_post.likes.exists?(user: current_user) %>
+                    <%= button_to 'Unlike', match_post_like_path(match_post, match_post.likes.find_by(user: current_user)), method: :delete, class: "bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded" %>
+                <% else %>
+                    <%= button_to 'Like', match_post_likes_path(match_post), method: :post, class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+                <% end %>
+
+                <%= link_to 'match_post', match_post_path(match_post), class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+
+            </div>
+        </div>
+        <% end %>
+    </div>
+</div>

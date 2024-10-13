@@ -1,0 +1,22 @@
+<h1>ImagePosts#edit</h1>
+<p>Find me in app/views/image_posts/edit.html.erb</p>
+
+<% if @image_post.errors.any? %>
+    <h2><%= pluralize(@image_post.errors.count, "error") %> prohibited this object from being saved: not successfully</h2>
+    <ul>
+        <% @image_post.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+        <% end %>
+    </ul>
+<% end %>
+
+<%= form_for @image_post do |f| %>
+    <%= f.label :title, "作品タイトル", class: "label" %>
+    <%= f.text_field :title, class: "input" %>
+
+    <%= f.label :image, "画像ファイル", class: "label" %>
+    <%= f.file_field :image %>
+
+
+    <%= f.submit '投稿', class: "button is-success" %>
+<% end %>

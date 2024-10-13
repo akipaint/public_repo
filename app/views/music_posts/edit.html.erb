@@ -1,0 +1,22 @@
+<h1>MusicPosts#edit</h1>
+<p>Find me in app/views/music_posts/edit.html.erb</p>
+
+<% if @music_post.errors.any? %>
+    <h2><%= pluralize(@music_post.errors.count, "error") %> prohibited this object from being saved: not successfully</h2>
+    <ul>
+        <% @music_post.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+        <% end %>
+    </ul>
+<% end %>
+
+<%= form_for @music_post do |f| %>
+    <%= f.label :title, "作品タイトル", class: "label" %>
+    <%= f.text_field :title, class: "input" %>
+
+    <%= f.label :music, "音楽ファイル", class: "label" %>
+    <%= f.file_field :music %>
+
+
+    <%= f.submit '投稿', class: "button is-success" %>
+<% end %>

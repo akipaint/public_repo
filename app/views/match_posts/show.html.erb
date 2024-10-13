@@ -1,0 +1,123 @@
+<div class="container mx-auto p-6">
+
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <h2 class="text-2xl font-semibold mb-2"><%= @match_post.image_post.title %></h2>
+        <h2 class="text-2xl font-semibold mb-2"><%= @match_post.music_post.title %></h2>
+
+        <div class="relative w-full max-w-[80vw] h-[80vh] rounded-lg flex justify-center items-center mx-auto">
+            <!-- レイヤー1: 画像 -->
+            <div class="absolute inset-0 overflow-hidden flex justify-center items-center">
+                <%= image_tag @match_post.image_post.image, class: "max-w-full h-full object-contain" %>
+            </div>
+
+            <!-- レイヤー2: オーディオビジュアライザー -->
+            <div class="absolute inset-0 opacity-60 flex items-end">
+                <% if @match_post.music_post.present? && @match_post.music_post.music.present? %>
+                    <!-- スクリプトを実行してオーディオビジュアライザーを描画 -->
+                    <canvas id="visualizer" class="w-full h-[15vh]"></canvas>
+                <% end %>
+            </div>
+        </div>
+
+        <% if @match_post.music_post.present? && @match_post.music_post.music.present? %>
+            <audio id="audio-player" src="<%= url_for(@match_post.music_post.music) %>" controls class="w-full rounded-lg shadow-sm">
+                <a href="<%= url_for(@match_post.music_post.music) %>" download class="text-blue-500 hover:underline">ダウンロード</a>
+            </audio>
+        <% end %>
+
+        <!-- Image Post Section -->
+        <p class="mt-2 text-gray-700">By <%= @match_post.image_post.user.username %></p>
+        <p class="text-gray-500"><%= @match_post.image_post.user.profile %></p>
+        <%= link_to 'View Profile', user_path(@match_post.image_post.user), class: "text-blue-500 hover:underline mt-2 inline-block" %>
+
+        <!-- Music Post Section -->
+        <p class="mt-2 text-gray-700">By <%= @match_post.music_post.user.username %></p>
+        <p class="text-gray-500"><%= @match_post.music_post.user.profile %></p>
+        <%= link_to 'View Profile', user_path(@match_post.music_post.user), class: "text-blue-500 hover:underline mt-2 inline-block" %>
+
+        <!-- Like Button Section -->
+        <div class="mt-6">
+            <% if @match_post.likes.exists?(user: current_user) %>
+                <%= button_to 'Unlike', match_post_like_path(@match_post, @match_post.likes.find_by(user: current_user)), method: :delete, class: "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" %>
+            <% else %>
+                <%= button_to 'Like', match_post_likes_path(@match_post), method: :post, class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
+            <% end %>
+        </div>
+
+        <!-- Tags List Section -->
+        <div class="mt-6">
+            <% @match_post.tags.each do |tag| %>
+                <span class="inline-block bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full mr-2 mb-2">
+                <%= link_to tag.name, search_tag_path(tag_id: tag.id), class: "flex items-center space-x-1" %>
+                <i class="fa-sharp fa-solid fa-tag"></i>
+                </span>
+            <% end %>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // オーディオプレイヤーとキャンバス要素を取得
+    const audioElement = document.getElementById('audio-player');
+    const canvas = document.getElementById('visualizer');
+    const ctx = canvas.getContext('2d'); // キャンバスの描画コンテキストを取得
+    const width = canvas.width; // キャンバスの幅
+    const height = canvas.height; // キャンバスの高さ
+
+    let audioContext; // AudioContext オブジェクトを保持する変数
+    let analyser; // AnalyserNode オブジェクトを保持する変数
+    let source; // MediaElementSourceNode オブジェクトを保持する変数
+
+    // オーディオプレイヤーが再生を開始したときの処理
+    audioElement.addEventListener('play', () => {
+        // AudioContext がまだ作成されていない場合にのみ新しく作成
+        if (!audioContext) {
+            // AudioContext を作成（古いブラウザのために webkitAudioContext をフォールバック）
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            // AnalyserNode を作成
+            analyser = audioContext.createAnalyser();
+            // MediaElementSourceNode を作成し、オーディオ要素をソースとして設定
+            source = audioContext.createMediaElementSource(audioElement);
+            // ソースとアナライザを接続
+            source.connect(analyser);
+            // AnalyserNode と AudioContext の出力を接続
+            analyser.connect(audioContext.destination);
+            // FFT サイズを設定
+            analyser.fftSize = 256;
+        }
+
+        // AudioContext を再開し、視覚化描画を開始
+        audioContext.resume().then(() => {
+            drawVisualizer();
+        });
+    });
+
+    const bufferLength = 256; // 周波数データの配列の長さ
+    const dataArray = new Uint8Array(bufferLength); // 音声データの配列
+
+    // ビジュアライザーを描画する関数
+    function drawVisualizer() {
+        // 毎フレーム描画をリクエスト
+        requestAnimationFrame(drawVisualizer);
+        // 周波数データを取得
+        analyser.getByteFrequencyData(dataArray);
+        // バーを描画する前に、描画する範囲だけをクリア
+        ctx.clearRect(0, 0, width, height); // 画面全体をクリア
+        // 透明な背景を設定
+        ctx.fillStyle = 'rgba(255, 255, 255, 0)'; // 完全に透明な色
+        ctx.fillRect(0, 0, width, height); // 透明な背景を描画
+
+        const barWidth = (width / bufferLength) * 2.5; // バーの幅を計算
+        let x = 0; // バーの描画位置を初期化
+        // 周波数データを使ってバーを描画
+        for (let i = 0; i < bufferLength; i++) {
+            const barHeight = dataArray[i] / 2; // バーの高さをデータに基づいて計算
+            ctx.fillStyle = 'rgb(250, 250, 250)'; // バーの色を設定
+            // バーを描画
+            ctx.fillRect(x, height - barHeight, barWidth, barHeight);
+            x += barWidth + 1; // 次のバーの位置を計算
+        }
+    }
+});
+
+</script>

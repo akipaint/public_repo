@@ -1,0 +1,24 @@
+<h1>ImagePosts#index</h1>
+<p>Find me in app/views/image_posts/index.html.erb</p>
+
+
+
+<div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <% @image_posts.each do |post| %>
+            <div class="relative bg-white shadow-lg rounded-lg overflow-hidden">
+                <a href="<%= image_post_path(post) %>">
+                    <% if post.image.attached? %>
+                        <img src="<%= url_for(post.image) %>" alt="<%= post.title %>" class="w-full h-auto">
+                    <% else %>
+                        <img src="path/to/default_image.jpg" alt="No Image" class="w-full h-auto">
+                    <% end %>
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-2"><%= post.title %></h3>
+                </div>
+            </div>
+
+        <% end %>
+    </div>
+</div>

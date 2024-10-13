@@ -1,0 +1,173 @@
+<div class="container mx-auto p-6">
+
+    <!-- User Profile Section -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6 flex items-center">
+        <%= attachment_image_tag @user, :profile_image, :fill, 100, 100, fallback: "no-image.png", class: "w-24 h-24 rounded-full border-2 border-gray-300" %>
+
+        <div class="ml-6">
+        <h2 class="text-2xl font-semibold mb-2"><%= @user.username %></h2>
+        <% if @user.id == current_user.id %>
+            <p class="text-gray-600 mb-2"><%= @user.email %></p>
+            <%= link_to "編集", edit_user_path(@user), class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
+        <% end %>
+        <p class="text-gray-700"><%= @user.profile %></p>
+        </div>
+
+        <% if current_user != @user %>
+        <div class="ml-auto">
+            <% if current_user.following?(@user) %>
+            <%= button_to 'Unfollow', relationship_path(current_user.active_relationships.find_by(followee_id: @user.id)), method: :delete, class: "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600" %>
+            <% else %>
+            <%= button_to 'Follow', relationships_path(followee_id: @user.id), method: :post, class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" %>
+            <% end %>
+        </div>
+        <% end %>
+    </div>
+
+    <!-- Tabs -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+        <ul class="flex border-b">
+        <li class="-mb-px mr-1">
+            <a href="#images-tab" class="bg-gray-200 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-t py-2 px-4 block">Liked Images</a>
+        </li>
+        <li class="-mb-px mr-1">
+            <a href="#music-tab" class="bg-gray-200 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-t py-2 px-4 block">Liked Music</a>
+        </li>
+        <li class="-mb-px mr-1">
+            <a href="#match-tab" class="bg-gray-200 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-t py-2 px-4 block">Liked Matches</a>
+        </li>
+        </ul>
+
+        <div id="images-tab" class="tab-content">
+        <!-- Liked Image Posts Section -->
+        <div class="mt-4">
+            <% @user.liked_image_posts.each do |image_post| %>
+            <div class="border-b border-gray-200 pb-4 mb-4">
+                <%= link_to image_post_path(image_post) do %>
+                <h3 class="text-xl font-semibold mb-2"><%= image_post.title %></h3>
+                <%= image_tag image_post.image, size: "300x300", class: "w-full h-auto rounded-lg shadow-sm mb-2" %>
+                <% end %>
+
+                <!-- Tags List -->
+                <div class="flex flex-wrap gap-2 mb-2">
+                <% image_post.tags.each do |tag| %>
+                    <a href="<%= search_tag_path(tag_id: tag.id) %>" class="inline-block bg-gray-200 text-gray-800 text-sm px-3 py-1 rounded-full">
+                    <i class="fa-sharp fa-solid fa-tag mr-1"></i><%= tag.name %>
+                    </a>
+                <% end %>
+                </div>
+
+                <div class="flex items-center mt-2">
+                <%= attachment_image_tag image_post.user, :profile_image, fallback: "no-image.png", class: "w-12 h-12 rounded-full border-2 border-gray-300" %>
+                <div class="ml-2">
+                    <%= link_to image_post.user.username, user_path(image_post.user), class: "text-blue-500 hover:underline" %>
+                    <p class="text-gray-500 text-sm"><time><%= image_post.updated_at.strftime("%Y-%m-%d %H:%M") %></time> 更新</p>
+                </div>
+                </div>
+            </div>
+            <% end %>
+        </div>
+        </div>
+
+        <div id="music-tab" class="tab-content hidden">
+        <!-- Liked Music Posts Section -->
+        <div class="mt-4">
+            <% @user.liked_music_posts.each do |music_post| %>
+            <div class="border-b border-gray-200 pb-4 mb-4">
+                <%= link_to music_post_path(music_post) do %>
+                <h3 class="text-xl font-semibold mb-2"><%= music_post.title %></h3>
+                <% end %>
+
+                <% if music_post.present? && music_post.music.present? %>
+                <audio src="<%= url_for(music_post.music) %>" controls class="w-full rounded-lg shadow-sm mb-2">
+                    <a href="<%= url_for(music_post.music) %>" download class="text-blue-500 hover:underline">ダウンロード</a>
+                </audio>
+                <% end %>
+
+                <div class="flex items-center mt-2">
+                <%= attachment_image_tag music_post.user, :profile_image, fallback: "no-image.png", class: "w-12 h-12 rounded-full border-2 border-gray-300" %>
+                <div class="ml-2">
+                    <%= link_to music_post.user.username, user_path(music_post.user), class: "text-blue-500 hover:underline" %>
+                    <p class="text-gray-500 text-sm"><time><%= music_post.updated_at.strftime("%Y-%m-%d %H:%M") %></time> 更新</p>
+                </div>
+                </div>
+            </div>
+            <% end %>
+        </div>
+        </div>
+
+        <div id="match-tab" class="tab-content hidden">
+        <!-- Liked Match Posts Section -->
+        <div class="mt-4">
+            <% @user.liked_match_posts.each do |match_post| %>
+            <div class="border-b border-gray-200 pb-4 mb-4">
+                <div class="flex flex-col md:flex-row">
+                <!-- Image Post -->
+                <div class="md:w-1/2 mb-4 md:mb-0">
+                    <h3 class="text-xl font-semibold mb-2"><%= match_post.image_post.title %></h3>
+                    <%= image_tag match_post.image_post.image, size: "500x500", class: "w-full h-auto rounded-lg shadow-sm mb-2" %>
+                    <p class="text-gray-700">By <%= match_post.image_post.user.username %></p>
+                    <p class="text-gray-500 mb-2"><%= match_post.image_post.user.profile %></p>
+                    <%= link_to user_path(match_post.image_post.user), class: "text-blue-500 hover:underline" do %>
+                    <%= match_post.image_post.user.username %> さんのページへ
+                    <% end %>
+                </div>
+
+                <!-- Music Post -->
+                <div class="md:w-1/2">
+                    <h3 class="text-xl font-semibold mb-2"><%= match_post.music_post.title %></h3>
+                    <% if match_post.music_post.present? && match_post.music_post.music.present? %>
+                    <audio src="<%= url_for(match_post.music_post.music) %>" controls class="w-full rounded-lg shadow-sm mb-2">
+                        <a href="<%= url_for(match_post.music_post.music) %>" download class="text-blue-500 hover:underline">ダウンロード</a>
+                    </audio>
+                    <% end %>
+                    <p class="text-gray-700">By <%= match_post.music_post.user.username %></p>
+                    <p class="text-gray-500 mb-2"><%= match_post.music_post.user.profile %></p>
+                    <%= link_to user_path(match_post.music_post.user), class: "text-blue-500 hover:underline" do %>
+                    <%= match_post.music_post.user.username %> さんのページへ
+                    <% end %>
+                </div>
+                </div>
+
+                <% if match_post.likes.exists?(user: current_user) %>
+                <%= button_to 'Unlike', match_post_like_path(match_post, match_post.likes.find_by(user: current_user)), method: :delete, class: "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mt-4" %>
+                <% else %>
+                <%= button_to 'Like', match_post_likes_path(match_post), method: :post, class: "bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mt-4" %>
+                <% end %>
+            </div>
+            <% end %>
+        </div>
+        </div>
+    </div>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('.tab-content');
+        const tabLinks = document.querySelectorAll('ul li a');
+
+        tabLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = e.target.getAttribute('href').substring(1);
+
+                // すべてのタブを非表示にする
+                tabs.forEach(tab => {
+                    tab.classList.add('hidden');
+                });
+
+                // 対象のタブを表示する
+                document.getElementById(targetId).classList.remove('hidden');
+
+                // すべてのタブリンクから背景色を削除
+                tabLinks.forEach(link => {
+                    link.classList.remove('bg-gray-300');
+                });
+
+                // クリックされたタブリンクに背景色を追加
+                e.target.classList.add('bg-gray-300');
+            });
+        });
+    });
+
+</script>

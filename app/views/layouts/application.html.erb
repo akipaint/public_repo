@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html="ja">
+  <head>
+    <title>App</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <!-- <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %> -->
+    <%= javascript_importmap_tags %>
+
+    <!--Tailwindcss設定-->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script type="text/javascript">
+        window.tailwind.config = {
+            darkMode: ['class'],
+            theme: {
+            extend: {
+                colors: {
+                primary: 'hsl(240, 5.9%, 10%)',
+                'primary-foreground': 'hsl(0, 0%, 98%)',
+                secondary: 'hsl(240, 4.8%, 80.9%)',
+                'secondary-foreground': 'hsl(240, 5.9%, 10%)',
+                accent: 'hsl(240, 4.8%, 95.9%)',
+                'accent-foreground': 'hsl(240, 5.9%, 10%)',
+                background: 'hsl(0, 0%, 100%)',
+                foreground: 'hsl(240, 10%, 3.9%)'
+                }
+
+            }
+            }
+        };
+    </script>
+  </head>
+
+  <body>
+    <% if flash[:notice] %>
+      <div class="notification is-info">
+        <p class="notice"><%= notice %></p>
+      </div>
+    <% end %>
+
+    <% if flash[:alert] %>
+      <div class="notification is-danger">
+        <p class="alert"><%= alert %></p>
+      </div>
+    <% end %>
+
+    <% unless request.path == '/users/sign_in' || request.path == '/users/sign_up' %>
+
+
+      <div class="bg-[#CCCCCC] p-4">
+        <nav class="text-primary-foreground py-tiny px-4 flex justify-between items-center">
+          <div class="navbar-brand">
+            <%= link_to root_path, class: "navbar-item" do %>
+              <h1 class="text-black font-bold hover:scale-110">マッチング型SNS</h1>
+            <% end %>
+            <div class="navbar-burger burger" data-target="navbarExampleTransparentExample">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+
+          <% if user_signed_in? %>
+            <div id="navbarExampleTransparentExample" class="navbar-menu">
+                <div class="navbar-item">
+                  <div class="flex gap-x-4">
+                    <%= link_to "画像投稿", new_image_post_path, class: "text-white bg-[#0066CC] hover:bg-[#1e3a8a] px-4 py-2 rounded-full mx-2 font-sans transition-transform transform hover:scale-110" %>
+                    <%= link_to "音楽投稿", new_music_post_path, class: "text-white bg-[#0066CC] hover:bg-[#1e3a8a] px-4 py-2 rounded-full mx-2 font-sans transition-transform transform hover:scale-110" %>
+                    <%= button_to "ログアウト", destroy_user_session_path, method: :delete, class: "text-white bg-[#0066CC] hover:bg-[#1e3a8a] px-4 py-2 rounded-full mx-2 font-sans transition-transform transform hover:scale-110" %>
+                    <%= link_to "ユーザ", user_path(current_user), class: "text-white bg-[#0066CC] hover:bg-[#1e3a8a] px-4 py-2 rounded-full mx-2 font-sans transition-transform transform hover:scale-110" %>
+                  </div>
+                </div>
+            </div>
+          <% else %>
+
+            <div id="navbarExampleTransparentExample" class="navbar-menu">
+                <div class="navbar-item">
+                  <div class="flex space-x-4">
+                    <%= link_to "ログイン", new_user_session_path, class: "text-white bg-[#0066CC] hover:bg-[#1e3a8a] px-4 py-2 rounded-full mx-2 font-sans transition-transform transform hover:scale-110" %>
+                    <%= link_to "新規登録", new_user_registration_path, class: "text-white bg-[#0066CC] hover:bg-[#1e3a8a] px-4 py-2 rounded-full mx-2 font-sans transition-transform transform hover:scale-110" %>
+                  </div>
+                </div>
+            </div>
+          <% end %>
+        </nav>
+      </div>
+
+
+
+    <% end %>
+
+
+    <%= yield %>
+  </body>
+</html>

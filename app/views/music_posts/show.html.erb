@@ -1,0 +1,89 @@
+<div class="max-w-xl mx-auto">
+<div class="flex items-center justify-between mb-2 mt-14">
+    <div class="flex items-center">
+        <div class="w-8 h-8 bg-gray-300 rounded-full flex justify-center items-center mr-2 cursor-pointer">▶</div>
+        <div class="text-lg font-bold mr-2"><%= @music_post.title %></div>
+    </div>
+
+    <!-- タグ（タイトル横） -->
+    <div class="flex flex-wrap justify-end">
+        <% @music_post_tags.each do |tag| %>
+            <span class="inline-block bg-gray-200 rounded-full px-4 py-2 text-base font-semibold text-gray-700 ml-1 mb-1">
+                <i class="fa-sharp fa-solid fa-tag text-lg"></i>
+                <%= link_to tag.name, search_tag_path(tag_id: tag.id) %>
+            </span>
+        <% end %>
+    </div>
+</div>
+
+<!-- スクリプトを実行してオーディオビジュアライザーを描画 -->
+<canvas id="visualizer" class="w-full h-20 bg-gray-200 mb-2"></canvas>
+
+<!-- 音楽操作 -->
+<% if @music_post.present? && @music_post.music.present? %>
+    <audio id="audio-player" src="<%= url_for(@music_post.music) %>" controls class="w-full mb-4">
+        <a href="<%= url_for(@music_post.music) %>" download>ダウンロード</a>
+    </audio>
+<% end %>
+
+<div class="flex items-center space-x-4 mb-4">
+    <!-- Likeボタン（ハートの形に）-->
+    <div>
+        <% if @music_post.likes.exists?(user: current_user) %>
+            <%= button_to music_post_like_path(@music_post, @music_post.likes.find_by(user: current_user)), method: :delete, class: "text-red-500 hover:text-red-700 focus:outline-none" do %>
+                <i class="fas fa-heart text-2xl"></i>
+            <% end %>
+        <% else %>
+            <%= button_to music_post_likes_path(@music_post), method: :post, class: "text-gray-400 hover:text-red-500 focus:outline-none" do %>
+                <i class="far fa-heart text-2xl"></i>
+            <% end %>
+        <% end %>
+    </div>
+
+    <!-- ユーザー名 -->
+    <div>
+        <%= link_to user_path(@music_post.user), class: "text-blue-400 hover:text-blue-600" do %>
+            @<%= @music_post.user.username%>
+        <% end %>
+        <p class="mt-1">
+            <%= @music_post.user.profile %>
+        </p>
+    </div>
+</div>
+
+<!-- タグの検索結果（hidden）で隠してあります。必要に応じて属性を外してください -->
+<div class="hidden">
+    <% @tag_list.each do |list| %>
+        <span class="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
+            <i class="fa-sharp fa-solid fa-tag"></i>
+            <%= link_to list.name, search_tag_path(tag_id: list.id)%>
+            <%= "(#{list.music_posts.count})" %>
+        </span>
+    <% end %>
+</div>
+
+<!-- 以降の処理（画像など）-->
+</div>
+<div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <% @image_posts.each do |post| %>
+            <div class="relative bg-white shadow-lg rounded-lg overflow-hidden">
+                <a href="<%= image_post_path(post) %>">
+                    <% if post.image.attached? %>
+                        <img src="<%= url_for(post.image) %>" alt="<%= post.title %>" class="w-full h-auto">
+                    <% else %>
+                        <img src="path/to/default_image.jpg" alt="No Image" class="w-full h-auto">
+                    <% end %>
+                </a>
+                <div class="p-4">
+                    <h3 class="text-lg font-semibold mb-2"><%= post.title %></h3>
+                </div>
+            </div>
+
+        <% end %>
+    </div>
+</div>
+
+<script type="module">
+    import "visualizer";
+</script>

@@ -1,0 +1,34 @@
+<h1 class="text-3xl font-bold mb-6">Music Posts</h1>
+<p class="mb-8">Find me in app/views/music_posts/index.html.erb</p>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 m-10">
+    <% @music_posts.each do |music_post| %>
+        <div class="bg-white shadow-lg rounded-lg overflow-hidden m-4">
+            <div class="p-4">
+                <%= link_to music_post_path(music_post), class: "text-xl font-semibold text-blue-500 hover:text-blue-700" do %>
+                    <%= music_post.title %>
+                <% end %>
+
+                <% if music_post.present? && music_post.music.present? %>
+                    <div class="mt-4">
+                        <audio src="<%= url_for(music_post.music) %>" controls class="w-full rounded-lg">
+                        <a href="<%= url_for(music_post.music) %>" download class="text-blue-500 hover:text-blue-700">Download</a>
+                        </audio>
+                    </div>
+                <% end %>
+            </div>
+
+            <div class="flex items-center p-4 bg-gray-100 border-t">
+                <div class="flex-shrink-0">
+                    <%= attachment_image_tag music_post.user, :profile_image, fallback: "no-image.png", class: "rounded-full w-12 h-12" %>
+                </div>
+                <div class="ml-4">
+                    <%= link_to music_post.user.username, user_path(music_post.user), class: "text-sm font-medium text-gray-700 hover:text-gray-900" %>
+                    <p class="text-xs text-gray-500">
+                        Updated <time><%= music_post.updated_at.strftime("%Y-%m-%d %H:%M") %></time>
+                    </p>
+                </div>
+            </div>
+        </div>
+    <% end %>
+</div>

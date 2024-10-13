@@ -1,0 +1,86 @@
+<div>
+  <h1 class="font-bold text-4xl">MatchPosts#new</h1>
+  <p>Find me in app/views/match_posts/new.html.erb</p>
+</div>
+
+<% if @source_post.is_a?(ImagePost) %>
+  <div id="image-post-info">
+    <h2>あなたの投稿</h2>
+    <%= image_tag @source_post.image, alt: @source_post.title if @source_post.image.attached? %>
+    <p><strong>タイトル:</strong> <%= @source_post.title %></p>
+    <p><strong>タグ:</strong> <%= @source_post.tags.map(&:name).join(', ') %></p>
+  </div>
+
+  <%= form_for @match_post do |form| %>
+    <% if @match_post.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(match_post.errors.count, "error") %> prohibited this match_post from being saved:</h2>
+
+        <ul>
+        <% match_post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= form.label :image_post_id %>
+      <%= form.hidden_field :image_post_id, value: @source_post.id %>
+    </div>
+
+    <div class="field">
+      <%= form.label :music_post_id %>
+      <%= form.collection_select :music_post_id, @selected_matches, :id, :title %>
+    </div>
+
+    <div class="actions">
+      <%= form.submit %>
+    </div>
+  <% end %>
+
+
+
+<% elsif @source_post.is_a?(MusicPost) %>
+
+  <!-- スクリプトを実行してオーディオビジュアライザーを描画 -->
+  <canvas id="visualizer" class="w-full h-20 bg-gray-200 mb-2"></canvas>
+
+  <!-- 音楽操作 -->
+  <% if @source_post.present? && @source_post.music.present? %>
+      <audio id="audio-player" src="<%= url_for(@source_post.music) %>" controls class="w-full mb-4">
+          <a href="<%= url_for(@source_post.music) %>" download>ダウンロード</a>
+      </audio>
+  <% end %>
+
+
+  <%= form_for @match_post do |form| %>
+    <% if @match_post.errors.any? %>
+      <div id="error_explanation">
+        <h2><%= pluralize(match_post.errors.count, "error") %> prohibited this match_post from being saved:</h2>
+
+        <ul>
+        <% match_post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="field">
+      <%= form.label :music_post_id %>
+      <%= form.hidden_field :music_post_id, value: @source_post.id %>
+    </div>
+
+    <div class="field">
+      <%= form.label :image_post_id %>
+      <%= form.collection_select :image_post_id, @selected_matches, :id, :title %>
+    </div>
+
+    <div class="actions">
+      <%= form.submit %>
+    </div>
+  <% end %>
+<% else %>
+  <h2>Error</h2>
+<% end %>

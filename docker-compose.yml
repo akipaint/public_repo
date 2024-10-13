@@ -1,0 +1,44 @@
+version: "3"
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks: # 追加
+      - app-network # 追加
+
+  web:
+    build: .
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    stdin_open: true
+    tty: true
+    networks: # 追加
+      - app-network # 追加
+
+  python_api:
+    build: ./python_api
+    volumes:
+      - ./python_api:/python_api
+    ports:
+      - "5000:5000"
+    networks: # 追加
+      - app-network # 追加
+
+volumes:
+  mysql-data:
+    driver: local
+
+networks: # 追加
+  app-network: # 追加
+    driver: bridge # 追加

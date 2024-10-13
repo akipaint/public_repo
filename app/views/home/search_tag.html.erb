@@ -1,0 +1,54 @@
+<h2>タグが<%=@tag.name%>の投稿一覧</h2>
+
+<!--タグリスト-->
+<% @tag_list.each do |list|%>
+    <i class="fa-sharp fa-solid fa-tag"></i>
+    <%=link_to list.name,search_tag_path(tag_id: list.id) %>
+    <%="(#{list.image_posts.count})" %>
+<% end %>
+
+<% @image_posts.each do |image_post| %>
+    <%= link_to image_post_path(image_post) do %>
+        <%= image_post.title %>
+        <%= image_tag image_post.image, size: "300x300" %>
+    <% end %>
+
+    <% @post_image_tags = image_post.tags %>
+
+    <!--タグリスト-->
+    <% @post_image_tags.each do |list|%>
+        <i class="fa-sharp fa-solid fa-tag"></i>
+        <%=link_to list.name,search_tag_path(tag_id: list.id) %>
+        <%="(#{list.image_posts.count})" %>
+    <% end %>
+
+
+    <%= attachment_image_tag image_post.user, :profile_image, fallback: "no-image.png", class: "profile_image" , size: "100x100" %>
+    <%=link_to image_post.user.username, user_path(image_post.user) %></div>
+    <time><%= image_post.updated_at.strftime("%Y-%m-%d %H:%M") %></time>更新
+<% end %>
+
+<% @music_posts.each do |music_post| %>
+    <%= link_to music_post_path(music_post) do %>
+        <%= music_post.title %>
+    <% end %>
+
+    <% if music_post.present? && music_post.music.present? %>
+        <audio src= "<%= url_for(music_post.music) %>" controls>
+            <a src="<%= url_for(music_post.music) %>" download>ダウンロード</a>
+        </audio>
+    <% end %>
+
+    <% @post_music_tags = music_post.tags %>
+
+    <!--タグリスト-->
+    <% @post_music_tags.each do |list|%>
+        <i class="fa-sharp fa-solid fa-tag"></i>
+        <%=link_to list.name,search_tag_path(tag_id: list.id) %>
+        <%="(#{list.image_posts.count})" %>
+    <% end %>
+
+    <%= attachment_image_tag music_post.user, :profile_image, fallback: "no-image.png", class: "profile_image" , size: "100x100" %>
+    <%=link_to music_post.user.username, user_path(music_post.user) %></div>
+    <time><%= music_post.updated_at.strftime("%Y-%m-%d %H:%M") %></time>更新
+<% end %>

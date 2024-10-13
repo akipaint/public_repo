@@ -1,0 +1,13 @@
+<h1>Following</h1>
+<% @user.followees.each do |user| %>
+    <%= link_to user_path(user) do %>
+        <%= user.username %> さんのページへ
+    <% end %>
+<% end %>
+
+<h1>Followers</h1>
+<% @user.followers.each do |user| %>
+    <%= link_to user_path(user) do %>
+        <%= user.username %> さんのページへ
+    <% end %>
+<% end %>

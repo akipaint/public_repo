@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ja" class="h-full bg-gray-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Music Post</title>
+    <script src="https://unpkg.com/wavesurfer.js@6.6.3/dist/wavesurfer.min.js"></script>
+</head>
+<body class="h-full">
+    <div class="min-h-full">
+        <header>
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <h1 class="text-4xl font-bold tracking-tight text-gray-900">ECHOE</h1>
+            </div>
+        </header>
+        <main>
+            <div class="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+                <!-- <p>Find me in app/views/music_posts/new.html.erb</p> -->
+
+                <% if @music_post.errors.any? %>
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                        <h2 class="font-bold"><%= pluralize(@music_post.errors.count, "error") %> prohibited this object from being saved: not successfully</h2>
+                        <ul class="mt-2 list-disc list-inside">
+                            <% @music_post.errors.full_messages.each do |message| %>
+                            <li><%= message %></li>
+                            <% end %>
+                        </ul>
+                    </div>
+                <% end %>
+
+                <%= form_for @music_post do |f| %>
+                    <div class="space-y-6">
+                        <div>
+                            <%= f.label :title, "作品タイトル", class: "block text-sm font-medium leading-6 text-gray-900" %>
+                            <div class="mt-2">
+                                <%= f.text_field :title, class: "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+                            </div>
+                        </div>
+
+                        <div>
+                            <%= f.label :music, "音楽ファイル", class: "block text-sm font-medium leading-6 text-gray-900" %>
+                            <div class="mt-2">
+                                <%= f.file_field :music, accept: "audio/*", class: "block w-full text-sm text-gray-900 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100", onchange: "handleFileUpload(this)" %>
+                            </div>
+                        </div>
+
+                        <div id="waveform" class="mt-4" style="width: 100%; min-height: 100px;"></div>
+                        <div id="waveform-error" class="mt-2 text-sm text-red-600"></div>
+
+                        <div class="mt-4">
+                            <button id="playPauseButton" type="button" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50" onclick="togglePlayPause()" disabled>
+                                再生
+                            </button>
+                        </div>
+
+                        <div>
+                            <%= f.label :name, "タグ(,で区切ると複数タグ登録できます)", class: "block text-sm font-medium leading-6 text-gray-900" %>
+                            <div class="mt-2">
+                                <%= f.text_field :name, value: @tag_list, class: "block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" %>
+                            </div>
+                        </div>
+
+                        <div>
+                            <%= f.submit '投稿', class: "flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600" %>
+                        </div>
+                    </div>
+                <% end %>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let wavesurfer;
+        let isPlaying = false;
+
+        function handleFileUpload(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const waveformElement = document.getElementById('waveform');
+                const errorElement = document.getElementById('waveform-error');
+                waveformElement.style.display = 'block';
+                errorElement.textContent = '';
+
+                if (wavesurfer) {
+                    wavesurfer.destroy();
+                }
+
+                try {
+                    <!-- 音波の設定 -->
+                    wavesurfer = WaveSurfer.create({
+                        container: '#waveform',
+                        waveColor: '#4a9eff',
+                        progressColor: '#1e90ff',
+                        height: 100,
+                        responsive: true,
+                        backend: 'WebAudio'
+                    });
+
+                    wavesurfer.on('error', function(err) {
+                        console.error('WaveSurfer error:', err);
+                        errorElement.textContent = 'エラー: 波形の生成に失敗しました。エラー詳細: ' + err;
+                    });
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        wavesurfer.load(e.target.result);
+                    };
+                    reader.onerror = function(e) {
+                        console.error('FileReader error:', e);
+                        errorElement.textContent = 'エラー: ファイルの読み込みに失敗しました。';
+                    };
+                    reader.readAsDataURL(file);
+
+                    document.getElementById('playPauseButton').disabled = false;
+
+                } catch (err) {
+                    console.error('Error creating WaveSurfer instance:', err);
+                    errorElement.textContent = 'エラー: WaveSurferの初期化に失敗しました。エラー詳細: ' + err;
+                }
+            }
+        }
+
+        function togglePlayPause() {
+            if (wavesurfer) {
+                wavesurfer.playPause();
+                isPlaying = !isPlaying;
+                updatePlayPauseButton();
+            }
+        }
+
+        function updatePlayPauseButton() {
+            const button = document.getElementById('playPauseButton');
+            button.textContent = isPlaying ? '停止' : '再生';
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof WaveSurfer === 'undefined') {
+                console.error('WaveSurfer is not defined. Make sure the script is loaded correctly.');
+                document.getElementById('waveform-error').textContent = 'エラー: WaveSurfer.jsの読み込みに失敗しました。';
+            } else {
+                console.log('WaveSurfer.js version:', WaveSurfer.VERSION);
+            }
+        });
+    </script>
+</body>
+</html>

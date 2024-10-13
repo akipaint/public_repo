@@ -1,0 +1,79 @@
+<div class="container mx-auto px-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 m-6">
+        <% @recommended_posts.each do |match_post| %>
+        <div class="bg-white rounded-lg overflow-hidden shadow-lg group hover:shadow-2xl hover:-translate-y-2 transform transition-all duration-300 ease-in-out relative">
+
+            <!-- 画像投稿 -->
+            <div class="relative">
+                <!-- 画像にホバーしたときだけ音楽を再生 -->
+                <%= link_to match_post_path(match_post), class: "block" do %>
+                    <%= image_tag match_post.image_post.image, class: "w-full h-64 object-cover hover:cursor-pointer", data: { audio_id: "audio-#{match_post.id}" } %>
+                <% end %>
+
+                <!-- カスタム再生バー -->
+                <div class="relative w-full h-2 bg-gray-300 rounded-full mt-2">
+                    <div id="progress-bar-<%= match_post.id %>" class="absolute top-0 left-0 h-2 bg-blue-500 rounded-full" style="width: 0%;"></div>
+                </div>
+
+                <div class="p-4">
+                    <h3 class="font-bold text-lg"><%= match_post.image_post.title %></h3>
+                    <p class="text-gray-700 text-sm">By <%= match_post.image_post.user.username %></p>
+                    <p class="text-gray-500 text-xs"><%= match_post.image_post.user.profile %></p>
+                    <%= link_to user_path(match_post.image_post.user), class: "text-blue-500 text-sm" do %>
+                    <%= match_post.image_post.user.username %> さんのページへ
+                    <% end %>
+                </div>
+            </div>
+
+            <!-- 非表示のオーディオタグ -->
+            <% if match_post.music_post.present? && match_post.music_post.music.present? %>
+                <audio id="audio-<%= match_post.id %>" src="<%= url_for(match_post.music_post.music) %>" class="hidden"></audio>
+            <% end %>
+
+            <!-- いいねボタン -->
+            <div class="p-4 border-t">
+            <% if match_post.likes.exists?(user: current_user) %>
+                <%= button_to 'Unlike', match_post_like_path(match_post, match_post.likes.find_by(user: current_user)), method: :delete, class: "w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition-colors" %>
+            <% else %>
+                <%= button_to 'Like', match_post_likes_path(match_post), method: :post, class: "w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition-colors" %>
+            <% end %>
+            </div>
+
+        </div>
+        <% end %>
+    </div>
+</div>
+
+<!-- JavaScriptでホバー時に音楽を再生し、再生バーを更新 -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // すべての画像タグに対して処理を実行
+        document.querySelectorAll('img[data-audio-id]').forEach(function (img) {
+        var audioElement = document.getElementById(img.dataset.audioId);
+        var progressBar = document.getElementById('progress-bar-' + img.dataset.audioId.split('-')[1]);
+
+        if (audioElement && progressBar) {
+            // オーディオの進行状況を更新する関数
+            var updateProgressBar = function() {
+            var percentage = (audioElement.currentTime / audioElement.duration) * 100;
+            progressBar.style.width = percentage + '%';
+            };
+
+            // マウスホバー時に音楽再生
+            img.addEventListener('mouseenter', function () {
+            audioElement.play();
+            // 再生中の進行状況を更新
+            audioElement.addEventListener('timeupdate', updateProgressBar);
+            });
+
+            // マウスが離れた時に音楽停止
+            img.addEventListener('mouseleave', function () {
+            audioElement.pause();
+            audioElement.currentTime = 0; // 曲を最初に戻す
+            progressBar.style.width = '0%'; // バーをリセット
+            audioElement.removeEventListener('timeupdate', updateProgressBar); // イベントリスナーを削除
+            });
+        }
+        });
+    });
+</script>

@@ -1,0 +1,12 @@
+
+<main class="p-4 flex flex-col items-center justify-center min-h-screen">
+    <div class="text-center max-w-2xl">
+        <h1 class="text-4xl font-bold mb-4">Welcome to IMG&MUSIC Matching SNS</h1>
+        <p class="text-lg mb-8">Connect with friends and the world around you on MySNS. Share your thoughts, photos, and more.</p>
+        <div class="flex justify-center space-x-4">
+            <%= link_to "Login", new_user_session_path, class: "bg-[#0066CC] text-white hover:bg-[#1e3a8a] px-6 py-3 rounded-md transform hover:scale-125" %>
+            <%= link_to "Sign up", new_user_registration_path, class: "bg-[#0066CC] text-white hover:bg-[#1e3a8a] px-6 py-3 rounded-md transform hover:scale-125" %>
+        </div>
+        <%= link_to "feed", feed_path, class: "bg-[#0066CC] text-white hover:bg-[#1e3a8a] px-6 py-3 rounded-md transform hover:scale-125" %>
+    </div>
+</main>
