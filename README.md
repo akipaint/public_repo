@@ -343,7 +343,6 @@ http://127.0.0.1:3000 にアクセスできるか確認
 | MYSQL_PORT          | MySQL のポート番号（Docker で使用）       | 3306         |                |
 
 <p align="right">(<a href="#top">トップへ</a>)</p>
->>>>>>> 8ecaa57c747a277a4822619d15989bfbd03726b5
-=======
+
 # public_SNS_repo
 公開用レポジトリ
