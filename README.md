@@ -12,6 +12,7 @@ https://echose.net <br >
 # 使用技術
 - Ruby 3.1.6
 - Ruby on Rails 7.0.8
+- Python (original API)
 - MySQL 8.0
 - Nginx
 - Puma
@@ -39,9 +40,11 @@ https://echose.net <br >
 - ユーザー登録、ログイン機能(devise)
 - 投稿機能
   - 画像投稿(refile/active storage)
+  - 音楽投稿(refile/active storage)
 - いいね機能(Ajax)
   - ランキング機能
 - コメント機能(Ajax)
+- マッチング機能(Python original API)
 - フォロー機能(Ajax)
 - ページネーション機能(kaminari)
   - 無限スクロール(Ajax)
